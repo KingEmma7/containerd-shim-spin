@@ -10,24 +10,15 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
+permissions:
+  contents: read
 jobs:
   rustfmt:
     uses: ./.github/workflows/action-check.yml
   build:
     uses: ./.github/workflows/action-build.yaml
-  build-wasm-images:
-    uses: ./.github/workflows/action-docker-build-push.yaml
-    needs: build
-    with:
-      test: true
-  publish-node-installer-image:
-    uses: ./.github/workflows/action-node-installer.yaml
-    needs: build
-    # This action requires use of the GITHUB_TOKEN to publish the image
-    # By default, PRs from forks don't have access, so we only run when the PR branch is on origin.
-    if: ${{ ! github.event.pull_request.head.repo.fork }}
-    with:
-      ref: ${{ github.ref }}
+  # Fork-only validation: keep the original build/test workflows and artifact path.
+  # Image-publishing workflows request write permissions and are outside this check.
   test:
     needs: build
     uses: ./.github/workflows/action-test.yml
